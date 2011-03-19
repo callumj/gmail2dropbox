@@ -1,0 +1,19 @@
+h1. gmail2dropbox
+
+gmail2dropbox is a simple ruby script that processes the unread emails in a Gmail account and saves their attachment to various Dropbox folders. It checks that each email has the words "for drobox" in the subject line and then consults the yaml config file (see conf_sample.yaml) to see what mappings are mentioned in the subject line.
+
+h2. Example
+
+Say if the mapping uni_work was set in the yaml config file. Sending an email, with attachment(s), containing the subject line "Uni Work for dropbox" would trigger the email to be processed according to the uni_work mapping.
+
+h2. Running
+
+gmail2dropbox requires that both the "gmail":https://github.com/dcparker/ruby-gmail and "dropbox":https://github.com/RISCfuture/dropbox gems be installed.
+
+You can then just run gmail2dropbox.rb using your favourite ruby interpreter with the conf file present. If no command line arguments are provided gmail2dropbox will look for conf.yaml in the same directory as the script, or you can just specify your own location.
+
+For simplicity gmail2dropbox uses the Dropbox gem serializing method to store oAuth access tokens, which means you need to specify the separate dropbox config file in the conf.yaml file. If the file is empty or non-existent on first start then gmail2dropbox will guide you create one for you.
+
+h2. Beta notes
+
+gmail2dropbox does not handle quotes well in the Content-Disposition header.

@@ -1,0 +1,11 @@
+--- 
+mappings: 
+  uni_work: Uni Work/Semester 1
+  default: Emailed files
+settings: 
+  last_run: 0
+  dropbox_oauth_file: /etc/dropbox.oauth.conf
+  user: dropboxuser@gmail.com
+  password: gmail_password
+  dropbox_key: dropbox_api_key
+  dropbox_secret: dropbox_api_secret
