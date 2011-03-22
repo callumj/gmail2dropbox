@@ -1,6 +1,7 @@
 --- 
 mappings: 
   uni_work: Uni Work
+  default: Emailed files
 settings: 
   last_run: 0
   dropbox_oauth_file: /etc/dropbox.oauth.conf
