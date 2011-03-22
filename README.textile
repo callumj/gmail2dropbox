@@ -1,10 +1,12 @@
 h1. gmail2dropbox
 
-gmail2dropbox is a simple ruby script that processes the unread emails in a Gmail account and saves their attachment to various Dropbox folders. It checks that each email has the words "for drobox" in the subject line and then consults the yaml config file (see conf_sample.yaml) to see what mappings are mentioned in the subject line.
+gmail2dropbox is a simple ruby script that processes the unread emails in a Gmail account and saves their attachment to various Dropbox folders. It checks that each email matches the regex trigger (either in the alias or subject line) in the settings file and then consults the yaml config file (see conf_sample.yaml) to see what mappings are mentioned in the subject line or email to alias.
 
 h2. Example
 
 Say if the mapping uni_work was set in the yaml config file. Sending an email, with attachment(s), containing the subject line "Uni Work for dropbox" would trigger the email to be processed according to the uni_work mapping.
+
+Alternatively sending the email to dropboxuser+for+dropbox+uni+work@gmail.com would work.
 
 h2. Running
 
@@ -13,6 +15,18 @@ gmail2dropbox requires that both the "gmail":https://github.com/dcparker/ruby-gm
 You can then just run gmail2dropbox.rb using your favourite ruby interpreter with the conf file present. If no command line arguments are provided gmail2dropbox will look for conf.yaml in the same directory as the script, or you can just specify your own location.
 
 For simplicity gmail2dropbox uses the Dropbox gem serializing method to store oAuth access tokens, which means you need to specify the separate dropbox config file in the conf.yaml file. If the file is empty or non-existent on first start then gmail2dropbox will guide you create one for you.
+
+Thanks to a suggestion by "Geoffrey Huntley":https://github.com/ghuntley you can now either match emails by email aliasing or subject matching.
+
+h3. Enabling aliasing
+
+To enable email aliasing set the use_email_alias value to true in the settings section of the config file. You can now email dropboxuser+for+dropbox+uni+work@gmail.com which will be translated into "for dropbox uni work" as if it were a subject line.
+
+If you have enabled aliasing you can enable grouping the attachments in the dropbox using the subject line, to enable this option set group_by_subject to true in the settings part of the config file.
+
+h3. Changing the trigger
+
+If you want to change the trigger for detection in the subject line or to alias (which was triggered by 'for dropbox' by default) you can change the regex option matching_trigger in settings. Entering something like "(for)\s+(dropbox)" is correct regex as it will be compiled when the application is launched.
 
 h2. Beta notes
 

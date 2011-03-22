@@ -1,7 +1,6 @@
 --- 
 mappings: 
-  uni_work: Uni Work/Semester 1
-  default: Emailed files
+  uni_work: Uni Work
 settings: 
   last_run: 0
   dropbox_oauth_file: /etc/dropbox.oauth.conf
@@ -9,3 +8,6 @@ settings:
   password: gmail_password
   dropbox_key: dropbox_api_key
   dropbox_secret: dropbox_api_secret
+  group_by_subject: true
+  matching_trigger: !ruby/regexp /(for)\s+(dropbox)/
+  use_email_alias: true

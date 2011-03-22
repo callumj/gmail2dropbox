@@ -52,16 +52,31 @@ all_emails = gmail_session.inbox.emails(:unread, :after => Date.parse(Time.at(CO
 
 newestTime = CONFIG_HASH["settings"]["last_run"]
 
+CONFIG_HASH["settings"]["matching_trigger"] = "(for)\s+(dropbox)" if CONFIG_HASH["settings"]["matching_trigger"] == nil #perform legacy transition
+
+CONFIG_HASH["settings"]["matching_trigger"] = Regexp.new CONFIG_HASH["settings"]["matching_trigger"] #compile regex for performance
+
 all_emails.each do |email|
-  if (email.subject != nil && email.subject.match(/(for)\s+(dropbox)/) != nil)
+  matching_source = email.subject
+  
+  #perform lookup based on email aliasing
+  if (CONFIG_HASH["settings"]["use_email_alias"] == true)
+    matching_source = nil
+    email.to_addrs.each {|to_addr| matching_source = to_addr[to_addr.index("+") + 1, to_addr.index("@") - to_addr.index("+") - 1] if (to_addr.index("+") != nil) }
+    matching_source.gsub!(/[+]/," ") if matching_source != nil
+  end
+  
+  if (matching_source != nil && matching_source.match(CONFIG_HASH["settings"]["matching_trigger"]) != nil)
     #determine mapping to use
     matched_mappings = []
-    CONFIG_HASH["mappings"].keys.each { |mapping_name| matched_mappings << mapping_name if email.subject.downcase.gsub(/[^A-Za-z0-9]/, "").match(mapping_name.downcase.gsub /[^A-Za-z0-9]/, "") != nil }
+    CONFIG_HASH["mappings"].keys.each { |mapping_name| matched_mappings << mapping_name if matching_source.downcase.gsub(/[^A-Za-z0-9]/, "").match(mapping_name.downcase.gsub /[^A-Za-z0-9]/, "") != nil }
     matched_mappings << "default" if matched_mappings.size == 0
     
     #group if more than one attachment
     extra_folder = ""
-    extra_folder = "/" + email.subject.gsub(/\s+(for)\s+(dropbox)\s+/,"") if email.attachments.size > 1
+    if (email.attachments.size > 1 && CONFIG_HASH["settings"]["group_by_subject"] == true && CONFIG_HASH["settings"]["use_email_alias"] == true)
+        extra_folder = "/" + email.subject.gsub(/[^A-Za-z0-9_ ]/,"") #group by a sensible subject name
+    end
     
     #store
     email.attachments.each do |attachment|
@@ -72,13 +87,14 @@ all_emails.each do |email|
       matched_mappings.each { |key| dropbox_session.upload(data_stream, "/#{CONFIG_HASH["mappings"][key]}#{extra_folder}", :mode => :dropbox, :as => file_name) }
     end
     
-    newestTime = email.date.to_i if email.date != nil && email.date.to_i > newestTime
+    newestTime = email.date.to_i if email.date != nil && email.date.to_i > newestTime #store the most recent processed email
     
+    #clean up inbox
     email.mark(:read)
   end
 end
 
-CONFIG_HASH["settings"]["last_run"] = newestTime
+CONFIG_HASH["settings"]["last_run"] = newestTime #update
 
 #Save back to file
 File.open(config_file, 'w') {|f| f.write(CONFIG_HASH.to_yaml) }
